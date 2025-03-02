@@ -1,0 +1,21 @@
+name = "email-sub"
+main = "./index.js"
+compatibility_date = "2023-12-01"
+
+# 配置Cloudflare Pages
+[site]
+source = "."
+bucket = "./"
+
+# 配置D1数据库
+[[d1_databases]]
+name = "DB"
+database_name = "subscribers"
+database_id = "6f4cda7b-58b6-4de3-b449-91f84b060d5d"
+
+# 初始化数据库表的SQL语句
+[env.local]
+[env.local.d1_databases]
+database_name = "subscribers"
+database_id = "local"
+migrations_dir = "./migrations"
