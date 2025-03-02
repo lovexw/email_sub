@@ -1,7 +1,22 @@
-export async function onRequestPost(context) {
+// 使用Cloudflare Pages Functions推荐的导出方式
+export default {
+  async fetch(request, env, ctx) {
+    // 只处理POST请求
+    if (request.method !== "POST") {
+      return new Response(JSON.stringify({ error: "Method not allowed" }), {
+        status: 405,
+        headers: { "Content-Type": "application/json" }
+      });
+    }
+    
+    return await handlePost(request, env, ctx);
+  }
+};
+
+async function handlePost(request, env, ctx) {
   try {
     // 获取请求体中的邮箱
-    const { email } = await context.request.json();
+    const { email } = await request.json();
     
     // 简单的邮箱格式验证
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -19,7 +34,7 @@ export async function onRequestPost(context) {
     }
     
     // 检查邮箱是否已存在
-    const { results } = await context.env.DB.prepare(
+    const { results } = await env.DB.prepare(
       'SELECT email FROM subscribers WHERE email = ?'
     ).bind(email).all();
     
@@ -38,7 +53,7 @@ export async function onRequestPost(context) {
     
     // 将邮箱保存到D1数据库
     const timestamp = new Date().toISOString();
-    await context.env.DB.prepare(
+    await env.DB.prepare(
       'INSERT INTO subscribers (email, subscribed_at) VALUES (?, ?)'
     ).bind(email, timestamp).run();
     
